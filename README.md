@@ -61,6 +61,7 @@ Programación: Permite configurar nuevas tareas de ejecución única (especifica
 
 Eliminación: Muestra un listado amigable de las tareas existentes para permitir seleccionar y eliminar de manera precisa una tarea específica sin alterar las demás configuraciones del sistema.
 
-Autores
+## Autores
 Denegri Sairitupac, Brenda
+
 Farfan Requejo, Steven
