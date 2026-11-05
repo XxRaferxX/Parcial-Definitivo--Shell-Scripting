@@ -30,7 +30,7 @@ chmod +x *.sh
 Bash
 ./modulo01.sh
 
-Módulos
+## Módulos
 📌 Módulo 01: Reporte del Sistema
 Funcionalidad: Recopila información clave del equipo de forma automatizada, incluyendo el usuario actual, fecha y hora del sistema, distribución de Linux, porcentaje actual de uso de CPU, estado de la memoria RAM (total y usada) y el espacio disponible/utilizado en el disco duro. Toda la información recopilada se muestra en pantalla y se almacena en un archivo de salida llamado Reporte_Sistema.txt.
 
