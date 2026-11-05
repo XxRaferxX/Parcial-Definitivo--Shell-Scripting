@@ -1,0 +1,170 @@
+#!/bin/bash
+
+#Funciones
+
+#F1 Creacion de archivos
+crear_archivo(){
+        #Aqui solicitamos el nombre por consola y se guarda en al variable archivo
+        echo ""
+        read -p "Ingrese el nombre del archivo: " archivo
+        #Aqui validamos si el archivo ya existe con el mismo nombre
+        if [ -e "$archivo" ]; then
+                echo "El archivo ya existe"
+                echo ""
+        else
+        #Aqui ya se crea el archivo
+                touch "$archivo"
+                echo "Se creo el archivo."
+                echo ""
+        fi
+}
+
+
+#F2 Copiar un archivo cambiandole de nombre
+copiar_archivo(){
+        #Aqui solicitamos el nombre del archivo a copiar
+        echo ""
+        read -p "Ingrese el nombre del archivo a copiar: " archivo
+        #Validamos si el archivo existe
+        if [ -e "$archivo" ];then
+
+        #Aqui solicitamos el nuevo nombre y validamos que no exista
+        while true; do
+                read -p "Ingrese el nombre del archivo copia: " archivo1
+                if [ ! -e "$archivo1" ]; then
+                        break
+                fi
+                echo "El archivo '$archivo1' ya existe. Por favor, ingrese otro nombre."
+                echo ""
+        done
+
+                #Realizamos la copia
+                cp "$archivo" "$archivo1"
+                echo "Archivo Copiado"
+                echo ""
+        else
+                echo "El archivo no existe"
+        fi
+
+}
+
+
+#F3 Opcion para cambiamos permisos
+cambiar_permisos(){
+        echo ""
+        # Aquí ingresamos el nombre del archivo a modificar
+        read -p "Ingrese el nombre del archivo: " archivo
+        # Validamos si el archivo existe
+        if [ -e "$archivo" ]; then
+                # Función para validar la opción s/n y asignarla directamente a la variable indicada
+                obtener_opcion() {
+                        local respuesta
+                        while true; do
+                                read -p "$1 (s/n): " respuesta
+                                if [ "$respuesta" = "s" ] || [ "$respuesta" = "n" ]; then
+                                        eval "$2='$respuesta'"
+                                        break
+                                else
+                                        echo "Opción inválida. Por favor, ingrese únicamente 's' o 'n'."
+                                fi
+                        done
+                }
+
+                # Una vez validado preguntamos por los permisos para cada tipo de usuario
+                echo "Configure los permisos (ingrese 's' para sí o 'n' para no):"
+
+                # Permisos para el Propietario (Owner)
+                echo ""
+                obtener_opcion "¿Permiso de lectura para el propietario (r)?" r_u
+                obtener_opcion "¿Permiso de escritura para el propietario (w)?" w_u
+                obtener_opcion "¿Permiso de ejecución para el propietario (x)?" x_u
+
+                # Permisos para el Grupo
+                echo ""
+                obtener_opcion "¿Permiso de lectura para el grupo (r)?" r_g
+                obtener_opcion "¿Permiso de escritura para el grupo (w)?" w_g
+                obtener_opcion "¿Permiso de ejecución para el grupo (x)?" x_g
+
+                # Permisos para otros
+                echo ""
+                obtener_opcion "¿Permiso de lectura para otros (r)?" r_o
+                obtener_opcion "¿Permiso de escritura para otros (w)?" w_o
+                obtener_opcion "¿Permiso de ejecución para otros (x)?" x_o
+
+                # Cálculo seguro de los valores numéricos (4, 2, 1) usando estructuras if tradicionales
+                calcular_permiso() {
+                    local val=0
+                    [ "$1" = "s" ] && val=$((val + 4))
+                    [ "$2" = "s" ] && val=$((val + 2))
+                    [ "$3" = "s" ] && val=$((val + 1))
+                    echo "$val"
+                }
+
+                perm_u=$(calcular_permiso "$r_u" "$w_u" "$x_u")
+                perm_g=$(calcular_permiso "$r_g" "$w_g" "$x_g")
+                perm_o=$(calcular_permiso "$r_o" "$w_o" "$x_o")
+
+                # Aplicamos los permisos
+                echo ""
+                echo "Permisos calculados: $perm_u$perm_g$perm_o"
+
+                chmod "$perm_u$perm_g$perm_o" "$archivo"
+                echo "Se actualizaron los permisos correctamente."
+                echo ""
+        else
+                echo "El archivo no existe"
+                echo ""
+        fi
+}
+
+
+#F4 Eliminamos archivos
+eliminar_archivo(){
+        #Aqui solicitamos el archivo a borrar
+        echo ""
+        read -p "Ingrese el nombre del archivo: " archivo
+        #Validamos si el archivo existe
+        if [ -f "$archivo" ]; then
+                #Una vez validado preguntamos nuevamente si esta seguro de borrar
+                read -p "Seguro que quiere eliminar el archivo?? (s/n)" rpt
+                #Validamos que la opc q se ingreso sea valida
+                if [ "$rpt" = "s" ] || [ "$rpt" = "S" ]; then
+                        rm -- "$archivo"
+                        echo "El archivo fue eliminado"
+                else
+                        echo "No se elimino el archivo"
+                fi
+        else
+                echo "El archivo no existe"
+        fi
+}
+
+
+
+
+
+#Menu
+#Creamos el menu que se monstrara en bucle
+while true; do
+        echo " "
+        echo "***** Bienvenido *****"
+        echo "   Eliga una opcion   "
+        echo "1. Crear Archivo"
+        echo "2. Copiar Archivo"
+        echo "3. Cambiar Permisos"
+        echo "4. Eliminar Archivo"
+        echo "5. Salir"
+
+        read -p "Que opc desea elegir?: "  opc
+        #aqui validamos la opcion ingresada
+        case "$opc" in
+                1) crear_archivo ;;
+                2) copiar_archivo ;;
+                3) cambiar_permisos ;;
+                4) eliminar_archivo ;;
+                5) echo "Saliendo... ";
+                   echo " "; break ;;
+                #Esta opcion se activa cuando no se ingresa un caracter valido
+                *) echo "Opcion no encontrada.... ";;
+        esac
+done

@@ -1,0 +1,41 @@
+#!/bin/bash
+
+echo ""
+#Titulo
+echo " Reporte Trabajo Parcial Definitivo "
+#Aqui se guarda en el txt
+echo " Reporte Trabajo Parcial " > Reporte_Sistema.txt
+
+#Mostrar el usuario Actual
+echo "Usuario Actual: $(whoami)"
+echo "Usuario Actual:  $(whoami)" >> Reporte_Sistema.txt
+
+#Monstramos El Dia y la Hora
+echo "La fecha actual es: $(date)"
+echo "La fecha actual es:  $(date)" >> Reporte_Sistema.txt
+
+#Monstramos La distribucion Linux
+echo "La distribucion Linux es: $(. /etc/os-release && echo $NAME $VERSION)"
+echo "La distribucion Linux es: $(. /etc/os-release && echo $NAME $VERSION)" >> Reporte_Sistema.txt
+
+#Monstramos el uso del CPU
+echo "El uso del CPU es: $(top -bn1 | grep "%Cpu" | awk -F'[, ]+' '{for(i=1;i<=NF;i++) if($i=="id") print 100-$(i-1)}')%"
+echo "El uso del CPU es: $(top -bn1 | grep "%Cpu" | awk -F'[, ]+' '{for(i=1;i<=NF;i++) if($i=="id") print 100-$(i-1)}')%" >> Reporte_Sistema.txt
+
+#Monstramos la Memoria Ram Total
+echo "La memoria RAM total es de: $(free -h | awk '/Mem/ {print $2}')"
+echo "La memoria RAM total es de: $(free -h | awk '/Mem/ {print $2}')" >> Reporte_Sistema.txt
+
+#Monstramos el Memoria Ram en uso
+echo "La memoria RAM Usada es de: $(free -h | awk '/Mem/ {print $3}')"
+echo "La memoria RAM Usada es de: $(free -h | awk '/Mem/ {print $3}')" >> Reporte_Sistema.txt
+
+#Monstramos El espacio total del disco duro
+echo "El espacio Total del disco es de: $(df -h /| awk 'NR==2 {print $2}')"
+echo "El espacio Total del disco es de: $(df -h /| awk 'NR==2 {print $2}')" >> Reporte_Sistema.txt
+
+#Monstramos el Espacio Usado del disco duro
+echo "El espacio Usado en el disco es de: $(df -h /| awk 'NR==2 {print $3}')"
+echo "El espacio Usado en el disco es de: $(df -h /| awk 'NR==2 {print $3}')" >> Reporte_Sistema.txt
+
+echo ""
