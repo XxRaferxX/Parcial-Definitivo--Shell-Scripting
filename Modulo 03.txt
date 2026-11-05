@@ -1,0 +1,113 @@
+#!/bin/bash
+
+DIR_ACTUAL="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ARCHIVO_ORIGEN="$DIR_ACTUAL/servidores.txt"
+ARCHIVO_INFORME="$DIR_ACTUAL/informe_servidores.txt"
+ARCHIVO_COPIA="$DIR_ACTUAL/informe_servidores2.txt"
+
+# Bucle principal del menú
+while true; do
+    echo ""
+    echo "============================================="
+    echo "       SISTEMA DE GESTIÓN DE SERVIDORES      "
+    echo "============================================="
+    echo "1) Analizar servidores"
+    echo "2) Modificar servidores"
+    echo "3) Salir"
+    echo ""
+
+    read -p "Elija una opción (1-3): " opcion
+
+    case $opcion in
+        1)
+            echo ""
+            echo "--- Analizando servidores (>70% de uso) ---"
+
+
+            # Encabezado del informe
+            {
+                echo "============================================================"
+                echo "INFORME DE SERVIDORES CRÍTICOS Y DE ALTO RIESGO (>70%)"
+                echo "============================================================"
+                printf "%-18s %-15s %-12s %-12s\n" "SERVIDOR" "DIRECCIÓN_IP" "USO_DISCO" "ESTADO"
+                echo "------------------------------------------------------------"
+            } > "$ARCHIVO_INFORME"
+
+            # Procesar el archivo con awk para filtrar >= 70% y asignar etiquetas
+            awk '
+            NR > 4 && $3 ~ /%$/ {
+                # Extraer el valor numérico quitando el símbolo %
+                gsub("%", "", $3);
+                uso = $3 + 0;
+
+                if (uso >= 70) {
+                    if (uso >= 90) {
+                        etiqueta = "Critico";
+                    } else if (uso >= 80) {
+                        etiqueta = "Alto";
+                    } else {
+                        etiqueta = "Moderado";
+                    }
+                    printf "%-18s %-15s %-12s %-12s\n", $1, $2, uso"%", etiqueta;
+                }
+            }' "$ARCHIVO_ORIGEN" >> "$ARCHIVO_INFORME"
+
+            echo "============================================================" >> "$ARCHIVO_INFORME"
+
+            echo "¡Análisis completado con éxito!"
+            echo "Se ha generado el archivo: informe_servidores.txt"
+            echo ""
+            cat "$ARCHIVO_INFORME"
+            ;;
+
+        2)
+            echo ""
+            echo "--- Modificando servidores ---"
+
+            # Verificar si existe el archivo de informe previo
+            if [ ! -f "$ARCHIVO_INFORME" ]; then
+                echo "Advertencia: No existe el archivo Previo"
+                echo "Debe ejecutar la opción 1 ('Analizar servidores') primero."
+                echo "Regresando al menú principal..."
+                continue
+            fi
+
+            # Crear copia del informe
+            cp "$ARCHIVO_INFORME" "$ARCHIVO_COPIA"
+
+            # Procesar con awk para bajar un 20% el uso del disco y mantener/imprimir la línea
+            awk '{
+                if ($3 ~ /%$/) {
+                    gsub("%", "", $3);
+                    nuevo_uso = ($3 + 0) - 20;
+                    if (nuevo_uso < 0) nuevo_uso = 0;
+
+                    # Imprimimos con el nuevo porcentaje, conservando temporalmente la etiqueta original de la columna 4
+                    printf "%-18s %-15s %-12s %-12s\n", $1, $2, nuevo_uso"%", $4;
+                } else {
+                    print $0;
+                }
+            }' "$ARCHIVO_COPIA" > "${ARCHIVO_COPIA}_tmp" && mv "${ARCHIVO_COPIA}_tmp" "$ARCHIVO_COPIA"
+
+            # Aplicar sustitución de etiquetas basada estrictamente en la regla solicitada:
+            # moderado -> atendido, alto -> estable, critico -> en espera
+            sed -i 's/\bModerado\b/Atendido/g' "$ARCHIVO_COPIA"
+            sed -i 's/\bAlto\b/Estable/g' "$ARCHIVO_COPIA"
+            sed -i 's/\bCritico\b/En Espera/g' "$ARCHIVO_COPIA"
+
+            echo "¡Modificación completada exitosamente!"
+            echo "Se ha creado la copia procesada: informe_servidores2.txt"
+            echo ""
+            cat "$ARCHIVO_COPIA"
+            ;;
+
+        3)
+            echo "Saliendo del sistema de gestión. ¡Hasta luego!"
+            exit 0
+            ;;
+
+        *)
+            echo "Error: Opción inválida. Por favor, ingrese un número entre 1 y 3."
+            ;;
+    esac
+done
